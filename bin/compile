@@ -29,7 +29,19 @@ EOM
 fi
 
 echo "-----> Configuring custom ImageMagick policies"
-cp "$BUILDPACK_DIR/config/policy.xml" "$BUILD_DIR/.magick/policy.xml"
+POLICY_DIR="/etc/ImageMagick-6"
+CUSTOM_POLICY_PATH="$BUILDPACK_DIR/config/policy.xml"
 
+if [ -d "$POLICY_DIR" ] && [ -f "$CUSTOM_POLICY_PATH" ]; then
+  echo "-----> Attempting to copy custom policy.xml to $POLICY_DIR"
+  cp "$CUSTOM_POLICY_PATH" "$POLICY_DIR/policy.xml"
+  if [ $? -eq 0 ]; then
+    echo "-----> Custom policy.xml copied successfully"
+  else
+    echo "-----> Failed to copy custom policy.xml. Permissions issue likely."
+  fi
+else
+  echo "-----> $POLICY_DIR directory or custom policy.xml file not found"
+fi
 
 $heroku_buildpack_ruby_dir/bin/ruby $BIN_DIR/support/ruby_compile $@
