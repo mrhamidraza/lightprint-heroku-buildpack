@@ -28,28 +28,8 @@ EOM
   compile_buildpack_v2 "$BUILD_DIR" "$CACHE_DIR" "$ENV_DIR" "https://buildpack-registry.s3.us-east-1.amazonaws.com/buildpacks/heroku/jvm.tgz" "heroku/jvm"
 fi
 
-# New section for ImageMagick installation
-echo "-----> Installing ImageMagick"
-IM_VERSION="7.0.11-13" # Specify the version you need
-IM_DIR="$BUILD_DIR/.heroku/imagemagick"
-mkdir -p $IM_DIR
-
-# Download, compile, and install ImageMagick
-curl -L "https://imagemagick.org/download/releases/ImageMagick-$IM_VERSION.tar.gz" | tar xz -C /tmp
-cd /tmp/ImageMagick-$IM_VERSION
-./configure --prefix=$IM_DIR
-make -j4
-make install
-
-# Update PATH
-export PATH="$IM_DIR/bin:$PATH"
-
-# Copy the custom policy.xml to the correct location
 echo "-----> Configuring custom ImageMagick policies"
-cp $BUILDPACK_DIR/config/policy.xml $IM_DIR/etc/ImageMagick-7/policy.xml
+cp "$BUILDPACK_DIR/config/policy.xml" "$BUILD_DIR/.magick/policy.xml"
 
-# Verify installation
-convert --version
 
-# Continue with Ruby compilation
 $heroku_buildpack_ruby_dir/bin/ruby $BIN_DIR/support/ruby_compile $@
